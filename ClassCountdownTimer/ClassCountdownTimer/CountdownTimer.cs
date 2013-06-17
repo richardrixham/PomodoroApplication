@@ -86,10 +86,11 @@ namespace ClassCountdownTimer
             _minutes = _initialMinutes;
             _seconds = 0;
         }
+
         public void StartTimer()
         {
-            _objTimer.Enabled = true; 
-            _objTimer.Start();
+            this._objTimer.Enabled = true; 
+            this._objTimer.Start();
         }
 
         public void StopTimer()

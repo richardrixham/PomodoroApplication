@@ -1,99 +1,107 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Configuration;
-using System.Windows.Forms;
-using ClassCountdownTimer;
-using ClassPomodoro;
-using PomodoroApp.Properties;
-
-namespace PomodoroApp
+﻿namespace PomodoroApp
 {
+    using System;
+    using System.Windows.Forms;
+
+    using ClassCountdownTimer;
+
+    using ClassPomodoro;
+
+    using PomodoroApp.Properties;
+
     public partial class PomodoroForm : Form
     {
-        private readonly Pomodoro _pomodoro = new Pomodoro();
-        readonly CountdownTimer _countdownTimer = new CountdownTimer();
+        /// <summary>
+        /// Stores configuration details and other information
+        /// </summary>
+        private readonly Pomodoro pomodoro = new Pomodoro();
+
+        /// <summary>
+        /// The _countdown timer.
+        /// </summary>
+        readonly CountdownTimer countdownTimer = new CountdownTimer();
 
         public PomodoroForm()
         {
             InitializeComponent();
         }
 
-        private void PomodoroForm_Load(object sender, EventArgs e)
+        private void PomodoroFormLoad(object sender, EventArgs e)
         {
-            LoadAppSettings();
-            _countdownTimer.Tick += new CountdownTimer.TickHandler(MyCountdown_Tick);
-            _countdownTimer.Complete +=new CountdownTimer.CompleteHandler(pomodoro_Complete);
-            GetNextTime();
-            TimerDisplay.Text = _countdownTimer.GetTime();
-            SetControlText(PomodoroStatus, "Pomodoro number " + (_pomodoro.CompletedPomodoro + 1));
+            this.LoadAppSettings();
+            this.countdownTimer.Tick += new CountdownTimer.TickHandler(this.MyCountdownTick);
+            this.countdownTimer.Complete += new CountdownTimer.CompleteHandler(this.PomodoroComplete);
+            this.GetNextTime();
+            this.TimerDisplay.Text = this.countdownTimer.GetTime();
+            SetControlText(this.PomodoroStatus, "Pomodoro number " + (this.pomodoro.CompletedPomodoro + 1));
         }
 
+        /// <summary>
+        /// Load the applications configuration
+        /// </summary>
         private void LoadAppSettings()
         {
-            _pomodoro.PomodoroMinutes = Properties.Settings.Default.PomodoroLength;
-            _pomodoro.LongBreakMinutes = Settings.Default.LongBreakLength;
-            _pomodoro.ShortBreakMinutes = Settings.Default.ShortBreakLength;
-            _pomodoro.LongBreakPomodoro = Settings.Default.LongBreakPomodoro;
-            _pomodoro.PlaySound = Settings.Default.PlayCompletedSound;
+            this.pomodoro.PomodoroMinutes = Settings.Default.PomodoroLength;
+            this.pomodoro.LongBreakMinutes = Settings.Default.LongBreakLength;
+            this.pomodoro.ShortBreakMinutes = Settings.Default.ShortBreakLength;
+            this.pomodoro.LongBreakPomodoro = Settings.Default.LongBreakPomodoro;
+            this.pomodoro.PlaySound = Settings.Default.PlayCompletedSound;
         }
 
-        private void MyCountdown_Tick(object sender, CountdownTimer.TickEventArgs args)
+        private void MyCountdownTick(object sender, CountdownTimer.TickEventArgs args)
         {
             SetControlText(TimerDisplay,args.Display);
             MyNotifyIcon.Text = args.Display;
         }
 
-        private void IncreasePomodoroCount(Boolean increasePomodoroCount = true)
+        private void IncreasePomodoroCount(bool increasePomodoroCount = true)
         {
-            if (!_pomodoro.BreakTime)
+            if (!this.pomodoro.BreakTime)
             {
                 if (increasePomodoroCount)
                 {
-                    _pomodoro.CompletedPomodoro += 1;
-                    SetControlText(lblSequence, _pomodoro.CompletedPomodoro.ToString());
+                    this.pomodoro.CompletedPomodoro += 1;
+                    SetControlText(lblSequence, this.pomodoro.CompletedPomodoro.ToString());
                 }
-                _pomodoro.SequenceCounter += 1;
+
+                this.pomodoro.SequenceCounter += 1;
             }
         }
 
         private void GetNextTime()
         {
-            if (_pomodoro.BreakTime)
+            if (this.pomodoro.BreakTime)
             {
-                if (_pomodoro.SequenceCounter % _pomodoro.LongBreakPomodoro == 0)
+                if (this.pomodoro.SequenceCounter % this.pomodoro.LongBreakPomodoro == 0)
                 {
-                    _countdownTimer.Minutes = _pomodoro.LongBreakMinutes;
+                    this.countdownTimer.Minutes = this.pomodoro.LongBreakMinutes;
                     SetControlText(PomodoroStatus, "Take a Long Break");
                 }
                 else
                 {
-                    _countdownTimer.Minutes = _pomodoro.ShortBreakMinutes;
+                    this.countdownTimer.Minutes = this.pomodoro.ShortBreakMinutes;
                     SetControlText(PomodoroStatus, "Take a Short Break");
                 }
             }
             else
             {
-                _countdownTimer.Minutes = _pomodoro.PomodoroMinutes;
-                SetControlText(PomodoroStatus, "Pomodoro number " + (_pomodoro.CompletedPomodoro+1));
+                this.countdownTimer.Minutes = this.pomodoro.PomodoroMinutes;
+                SetControlText(PomodoroStatus, "Pomodoro number " + (this.pomodoro.CompletedPomodoro + 1));
             }
         }
 
-        private void pomodoro_Complete(object sender, EventArgs args)
+        private void PomodoroComplete(object sender, EventArgs args)
         {
-            _pomodoro.PlayCompletedSound();
-            IncreasePomodoroCount();
-            _pomodoro.SwapBreakTime();
-            GetNextTime();
-            SetControlText(TimerDisplay, _countdownTimer.GetTime());
-
-            _countdownTimer.ResetTimer();
-            SetButtonState(PauseButton, false);
+            this.pomodoro.PlayCompletedSound();
+            GetNextIntervalDetails(true);
+            SetControlText(TimerDisplay, this.countdownTimer.GetTime());
+            this.countdownTimer.ResetTimer();
             SetControlText(StartButton, Resources.PomodoroForm_StartButton_Click_Start);
+            SetControlText(PauseButton,Resources.PomodoroForm_PaulButton_Click_Skip);
             MessageBox.Show(Resources.PomodoroForm_pomodoro_Complete_Done_);
         }
 
-
-        private void StartButton_Click(object sender, EventArgs e)
+        private void StartButtonClick(object sender, EventArgs e)
         {
             if (StartButton.Text == Resources.PomodoroForm_StartButton_Click_Start)
             {
@@ -107,26 +115,27 @@ namespace PomodoroApp
 
         private void StartTimer()
         {
-            _countdownTimer.InitialiseTimer();
-            _countdownTimer.StartTimer();
+            this.countdownTimer.InitialiseTimer();
+            this.countdownTimer.StartTimer();
             StartButton.Text = Resources.PomodoroForm_StartTimer_Stop;
-            PomodoroStatus.Text = "";
+            PomodoroStatus.Text = string.Empty;
+            PauseButton.Text = Resources.PomodoroForm_PauseButton_Click_Pause;
             SetButtonState(PauseButton, true);
         }
 
         private void StopTimer()
         {
-            SetButtonState(PauseButton, false); 
-            _countdownTimer.StopTimer();
+            this.countdownTimer.StopTimer();
             StartButton.Text = Resources.PomodoroForm_StartButton_Click_Start;
+            PauseButton.Text = Resources.PomodoroForm_PaulButton_Click_Skip;
             IncreasePomodoroCount(false);
-            _pomodoro.SwapBreakTime();
+            this.pomodoro.SwapBreakTime();
             GetNextTime();
-            _countdownTimer.InitialiseTimer();
-            SetControlText(TimerDisplay, _countdownTimer.GetTime());
+            this.countdownTimer.InitialiseTimer();
+            SetControlText(TimerDisplay, this.countdownTimer.GetTime());
         }
 
-        private void PomodoroForm_Resize(object sender, EventArgs e)
+        private void PomodoroFormResize(object sender, EventArgs e)
         {
             if (FormWindowState.Minimized == WindowState)
             {
@@ -140,44 +149,59 @@ namespace PomodoroApp
             }
         }
 
-        private void PomodoroForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void PomodoroFormFormClosing(object sender, FormClosingEventArgs e)
         {
-            _countdownTimer.StopTimer();
+            this.countdownTimer.StopTimer();
         }
 
-        private void MyNotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void MyNotifyIconMouseDoubleClick(object sender, MouseEventArgs e)
         {
             MyNotifyIcon.Visible = false;
             Show();
             WindowState = FormWindowState.Normal;
         }
 
-
-        private void PauseButton_Click(object sender, EventArgs e)
+        private void PauseButtonClick(object sender, EventArgs e)
         {
             if (PauseButton.Text == Resources.PomodoroForm_PauseButton_Click_Pause)
             {
-                PauseTimer();
+                this.PauseTimer();
             }
             else
             {
-                ResumeTimer();
+                if (PauseButton.Text == Resources.PomodoroForm_PauseButton_Click_Resume)
+                {
+                    this.ResumeTimer();
+                }
+                else
+                {
+                    if (PauseButton.Text == Resources.PomodoroForm_PaulButton_Click_Skip)
+                    {
+                        this.SkipTimer();
+                    }
+                }
             }
+        }
+
+        private void SkipTimer()
+        {
+            this.GetNextIntervalDetails(false);
+            this.TimerDisplay.Text = this.countdownTimer.GetTime(); 
         }
 
         private void PauseTimer()
         {
-            _countdownTimer.StopTimer();
+            this.countdownTimer.StopTimer();
             PauseButton.Text = Resources.PomodoroForm_PauseButton_Click_Resume;
         }
 
         private void ResumeTimer()
         {
-            _countdownTimer.StartTimer();
+            this.countdownTimer.StartTimer();
             PauseButton.Text = Resources.PomodoroForm_PauseButton_Click_Pause;                            
         }
 
-        private void SetButtonState(Control button, Boolean state)
+        private void SetButtonState(Control button, bool state)
         {
             // If the current thread is not the UI thread, InvokeRequired will be true
             if (button.InvokeRequired)
@@ -187,27 +211,20 @@ namespace PomodoroApp
                 button.Invoke((Action)(() => SetButtonState(button, state)));
                 return;
             }
+
             // If we're running on the UI thread, we'll get here, and can safely update 
             // the label's text.
             PauseButton.Enabled = state;
         }
 
-        private void SetControlText(Control obj, string text)
+        private void GetNextIntervalDetails(bool increaseCount)
         {
-            // If the current thread is not the UI thread, InvokeRequired will be true
-            if (obj.InvokeRequired)
-            {
-                // If so, call Invoke, passing it a lambda expression which calls
-                // UpdateText with the same label and text, but on the UI thread instead.
-                obj.Invoke((Action)(() => SetControlText(obj, text)));
-                return;
-            }
-            // If we're running on the UI thread, we'll get here, and can safely update 
-            // the label's text.
-            obj.Text = text;
+            IncreasePomodoroCount(increaseCount);
+            this.pomodoro.SwapBreakTime();
+            GetNextTime();
         }
 
-        private void configurationToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigurationToolStripMenuItemClick(object sender, EventArgs e)
         {
             var configForm = new PomodoroAppConfiguration();
             configForm.ShowDialog();

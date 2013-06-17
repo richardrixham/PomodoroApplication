@@ -61,6 +61,15 @@ namespace PomodoroApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Skip.
+        /// </summary>
+        internal static string PomodoroForm_PaulButton_Click_Skip {
+            get {
+                return ResourceManager.GetString("PomodoroForm_PaulButton_Click_Skip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pause.
         /// </summary>
         internal static string PomodoroForm_PauseButton_Click_Pause {

@@ -1,5 +1,8 @@
 ﻿namespace PomodoroApp
 {
+    using System;
+    using System.Windows.Forms;
+
     partial class PomodoroForm
     {
         /// <summary>
@@ -52,7 +55,7 @@
             this.StartButton.TabIndex = 0;
             this.StartButton.Text = "Start";
             this.StartButton.UseVisualStyleBackColor = true;
-            this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
+            this.StartButton.Click += new System.EventHandler(this.StartButtonClick);
             // 
             // TimerDisplay
             // 
@@ -80,7 +83,7 @@
             this.configurationToolStripMenuItem.Name = "configurationToolStripMenuItem";
             this.configurationToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.configurationToolStripMenuItem.Text = "Configuration";
-            this.configurationToolStripMenuItem.Click += new System.EventHandler(this.configurationToolStripMenuItem_Click);
+            this.configurationToolStripMenuItem.Click += new System.EventHandler(this.ConfigurationToolStripMenuItemClick);
             // 
             // pictureBox1
             // 
@@ -101,7 +104,7 @@
             this.MyNotifyIcon.BalloonTipTitle = "Pomodoro";
             this.MyNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("MyNotifyIcon.Icon")));
             this.MyNotifyIcon.Text = "Pomodoro Text";
-            this.MyNotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.MyNotifyIcon_MouseDoubleClick);
+            this.MyNotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.MyNotifyIconMouseDoubleClick);
             // 
             // PauseButton
             // 
@@ -110,9 +113,9 @@
             this.PauseButton.Name = "PauseButton";
             this.PauseButton.Size = new System.Drawing.Size(82, 34);
             this.PauseButton.TabIndex = 3;
-            this.PauseButton.Text = "Pause";
+            this.PauseButton.Text = "Skip";
             this.PauseButton.UseVisualStyleBackColor = true;
-            this.PauseButton.Click += new System.EventHandler(this.PauseButton_Click);
+            this.PauseButton.Click += new System.EventHandler(this.PauseButtonClick);
             // 
             // PomodoroStatus
             // 
@@ -164,9 +167,9 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Pomodoro";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PomodoroForm_FormClosing);
-            this.Load += new System.EventHandler(this.PomodoroForm_Load);
-            this.Resize += new System.EventHandler(this.PomodoroForm_Resize);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PomodoroFormFormClosing);
+            this.Load += new System.EventHandler(this.PomodoroFormLoad);
+            this.Resize += new System.EventHandler(this.PomodoroFormResize);
             this.contextMenuStrip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -186,6 +189,22 @@
         private System.Windows.Forms.ToolStripMenuItem configurationToolStripMenuItem;
         private System.Windows.Forms.Label lblSequence;
         private System.Windows.Forms.Label lblToday;
+
+        private static void SetControlText(Control obj, string text)
+        {
+            // If the current thread is not the UI thread, InvokeRequired will be true
+            if (obj.InvokeRequired)
+            {
+                // If so, call Invoke, passing it a lambda expression which calls
+                // UpdateText with the same label and text, but on the UI thread instead.
+                obj.Invoke((Action)(() => SetControlText(obj, text)));
+                return;
+            }
+
+            // If we're running on the UI thread, we'll get here, and can safely update 
+            // the label's text.
+            obj.Text = text;
+        }
     }
 }
 
